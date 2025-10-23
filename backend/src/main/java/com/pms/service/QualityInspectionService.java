@@ -7,6 +7,7 @@ import com.pms.entity.QualityInspection;
 import com.pms.exception.ResourceNotFoundException;
 import com.pms.context.OrganizationContext;
 import com.pms.repository.QualityInspectionRepository;
+import com.pms.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +21,11 @@ import java.util.stream.Collectors;
 public class QualityInspectionService {
 
     private final QualityInspectionRepository qualityInspectionRepository;
+    private final ProjectRepository projectRepository;
 
     @Transactional(readOnly = true)
     public ApiResponse<List<QualityInspectionDTO>> getAllInspections() {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<QualityInspection> inspections = qualityInspectionRepository.findByOrganizationId(organizationId);
         List<QualityInspectionDTO> inspectionDTOs = inspections.stream()
                 .map(this::convertToDTO)
@@ -33,7 +35,7 @@ public class QualityInspectionService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<QualityInspectionDTO>> getInspectionsByProject(Long projectId) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<QualityInspection> inspections = qualityInspectionRepository.findByProjectIdAndOrganizationId(projectId, organizationId);
         List<QualityInspectionDTO> inspectionDTOs = inspections.stream()
                 .map(this::convertToDTO)
@@ -43,7 +45,7 @@ public class QualityInspectionService {
 
     @Transactional(readOnly = true)
     public ApiResponse<QualityInspectionDTO> getInspectionById(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         QualityInspection inspection = qualityInspectionRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Quality inspection not found with id: " + id));
         return ApiResponse.success(convertToDTO(inspection), "Quality inspection retrieved successfully");
@@ -51,22 +53,26 @@ public class QualityInspectionService {
 
     @Transactional
     public ApiResponse<QualityInspectionDTO> createInspection(QualityInspectionDTO inspectionDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         
         Project project = projectRepository.findByIdAndOrganizationId(inspectionDTO.getProjectId(), organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + inspectionDTO.getProjectId()));
 
         QualityInspection inspection = new QualityInspection();
         inspection.setProject(project);
-        inspection.setOrganizationId(organizationId);
-        inspection.setInspectionType(inspectionDTO.getInspectionType());
-        inspection.setInspectionDate(inspectionDTO.getInspectionDate() != null ? inspectionDTO.getInspectionDate() : LocalDate.now());
-        inspection.setInspector(inspectionDTO.getInspector());
+        inspection.setInspectionNumber(inspectionDTO.getInspectionNumber());
+        inspection.setTitle(inspectionDTO.getTitle());
+        inspection.setDescription(inspectionDTO.getDescription());
+        inspection.setType(inspectionDTO.getType());
+        inspection.setScheduledDate(inspectionDTO.getScheduledDate() != null ? inspectionDTO.getScheduledDate() : LocalDate.now());
+        inspection.setCompletedDate(inspectionDTO.getCompletedDate());
         inspection.setLocation(inspectionDTO.getLocation());
-        inspection.setChecklistItems(inspectionDTO.getChecklistItems());
         inspection.setFindings(inspectionDTO.getFindings());
         inspection.setStatus(inspectionDTO.getStatus());
+        inspection.setResult(inspectionDTO.getResult());
         inspection.setRecommendations(inspectionDTO.getRecommendations());
+        inspection.setCorrectiveActions(inspectionDTO.getCorrectiveActions());
+        inspection.setAttachments(inspectionDTO.getAttachments());
 
         QualityInspection savedInspection = qualityInspectionRepository.save(inspection);
         return ApiResponse.success(convertToDTO(savedInspection), "Quality inspection created successfully");
@@ -74,18 +80,23 @@ public class QualityInspectionService {
 
     @Transactional
     public ApiResponse<QualityInspectionDTO> updateInspection(Long id, QualityInspectionDTO inspectionDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         QualityInspection inspection = qualityInspectionRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Quality inspection not found with id: " + id));
 
-        inspection.setInspectionType(inspectionDTO.getInspectionType());
-        inspection.setInspectionDate(inspectionDTO.getInspectionDate());
-        inspection.setInspector(inspectionDTO.getInspector());
+        inspection.setInspectionNumber(inspectionDTO.getInspectionNumber());
+        inspection.setTitle(inspectionDTO.getTitle());
+        inspection.setDescription(inspectionDTO.getDescription());
+        inspection.setType(inspectionDTO.getType());
+        inspection.setScheduledDate(inspectionDTO.getScheduledDate());
+        inspection.setCompletedDate(inspectionDTO.getCompletedDate());
         inspection.setLocation(inspectionDTO.getLocation());
-        inspection.setChecklistItems(inspectionDTO.getChecklistItems());
         inspection.setFindings(inspectionDTO.getFindings());
         inspection.setStatus(inspectionDTO.getStatus());
+        inspection.setResult(inspectionDTO.getResult());
         inspection.setRecommendations(inspectionDTO.getRecommendations());
+        inspection.setCorrectiveActions(inspectionDTO.getCorrectiveActions());
+        inspection.setAttachments(inspectionDTO.getAttachments());
 
         QualityInspection updatedInspection = qualityInspectionRepository.save(inspection);
         return ApiResponse.success(convertToDTO(updatedInspection), "Quality inspection updated successfully");
@@ -93,7 +104,7 @@ public class QualityInspectionService {
 
     @Transactional
     public ApiResponse<Void> deleteInspection(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         QualityInspection inspection = qualityInspectionRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Quality inspection not found with id: " + id));
         qualityInspectionRepository.delete(inspection);
@@ -105,15 +116,21 @@ public class QualityInspectionService {
         dto.setId(inspection.getId());
         dto.setProjectId(inspection.getProject().getId());
         dto.setProjectName(inspection.getProject().getName());
-        dto.setOrganizationId(inspection.getOrganizationId());
-        dto.setInspectionType(inspection.getInspectionType());
-        dto.setInspectionDate(inspection.getInspectionDate());
-        dto.setInspector(inspection.getInspector());
-        dto.setLocation(inspection.getLocation());
-        dto.setChecklistItems(inspection.getChecklistItems());
-        dto.setFindings(inspection.getFindings());
+        dto.setInspectionNumber(inspection.getInspectionNumber());
+        dto.setTitle(inspection.getTitle());
+        dto.setDescription(inspection.getDescription());
+        dto.setType(inspection.getType());
         dto.setStatus(inspection.getStatus());
+        dto.setResult(inspection.getResult());
+        dto.setScheduledDate(inspection.getScheduledDate());
+        dto.setCompletedDate(inspection.getCompletedDate());
+        dto.setLocation(inspection.getLocation());
+        dto.setInspectorId(inspection.getInspector() != null ? inspection.getInspector().getId() : null);
+        dto.setInspectorName(inspection.getInspector() != null ? inspection.getInspector().getUsername() : null);
+        dto.setFindings(inspection.getFindings());
         dto.setRecommendations(inspection.getRecommendations());
+        dto.setCorrectiveActions(inspection.getCorrectiveActions());
+        dto.setAttachments(inspection.getAttachments());
         dto.setCreatedAt(inspection.getCreatedAt());
         dto.setUpdatedAt(inspection.getUpdatedAt());
         return dto;

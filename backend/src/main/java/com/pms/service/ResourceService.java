@@ -7,6 +7,7 @@ import com.pms.entity.Project;
 import com.pms.exception.ResourceNotFoundException;
 import com.pms.context.OrganizationContext;
 import com.pms.repository.ResourceRepository;
+import com.pms.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,7 @@ public class ResourceService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<ResourceDTO>> getAllResources() {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<Resource> resources = resourceRepository.findByOrganizationId(organizationId);
         List<ResourceDTO> resourceDTOs = resources.stream()
                 .map(this::convertToDTO)
@@ -33,7 +34,7 @@ public class ResourceService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<ResourceDTO>> getResourcesByProject(Long projectId) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<Resource> resources = resourceRepository.findByProjectIdAndOrganizationId(projectId, organizationId);
         List<ResourceDTO> resourceDTOs = resources.stream()
                 .map(this::convertToDTO)
@@ -43,7 +44,7 @@ public class ResourceService {
 
     @Transactional(readOnly = true)
     public ApiResponse<ResourceDTO> getResourceById(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         Resource resource = resourceRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id: " + id));
         return ApiResponse.success(convertToDTO(resource), "Resource retrieved successfully");
@@ -51,14 +52,13 @@ public class ResourceService {
 
     @Transactional
     public ApiResponse<ResourceDTO> createResource(ResourceDTO resourceDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         
         Project project = projectRepository.findByIdAndOrganizationId(resourceDTO.getProjectId(), organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + resourceDTO.getProjectId()));
 
         Resource resource = new Resource();
         resource.setProject(project);
-        resource.setOrganizationId(organizationId);
         resource.setResourceName(resourceDTO.getResourceName());
         resource.setResourceType(resourceDTO.getResourceType());
         resource.setResourceRole(resourceDTO.getResourceRole());
@@ -75,7 +75,7 @@ public class ResourceService {
 
     @Transactional
     public ApiResponse<ResourceDTO> updateResource(Long id, ResourceDTO resourceDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         Resource resource = resourceRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id: " + id));
 
@@ -95,7 +95,7 @@ public class ResourceService {
 
     @Transactional
     public ApiResponse<Void> deleteResource(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         Resource resource = resourceRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id: " + id));
         resourceRepository.delete(resource);
@@ -107,7 +107,6 @@ public class ResourceService {
         dto.setId(resource.getId());
         dto.setProjectId(resource.getProject().getId());
         dto.setProjectName(resource.getProject().getName());
-        dto.setOrganizationId(resource.getOrganizationId());
         dto.setResourceName(resource.getResourceName());
         dto.setResourceType(resource.getResourceType());
         dto.setResourceRole(resource.getResourceRole());

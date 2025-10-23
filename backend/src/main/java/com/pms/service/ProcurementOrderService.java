@@ -25,7 +25,7 @@ public class ProcurementOrderService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<ProcurementOrderDTO>> getAllProcurementOrders() {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<ProcurementOrder> orders = procurementOrderRepository.findByOrganizationId(organizationId);
         List<ProcurementOrderDTO> orderDTOs = orders.stream()
                 .map(this::convertToDTO)
@@ -35,7 +35,7 @@ public class ProcurementOrderService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<ProcurementOrderDTO>> getProcurementOrdersByProject(Long projectId) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<ProcurementOrder> orders = procurementOrderRepository.findByProjectIdAndOrganizationId(projectId, organizationId);
         List<ProcurementOrderDTO> orderDTOs = orders.stream()
                 .map(this::convertToDTO)
@@ -45,7 +45,7 @@ public class ProcurementOrderService {
 
     @Transactional(readOnly = true)
     public ApiResponse<ProcurementOrderDTO> getProcurementOrderById(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         ProcurementOrder order = procurementOrderRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Procurement order not found with id: " + id));
         return ApiResponse.success(convertToDTO(order), "Procurement order retrieved successfully");
@@ -53,14 +53,13 @@ public class ProcurementOrderService {
 
     @Transactional
     public ApiResponse<ProcurementOrderDTO> createProcurementOrder(ProcurementOrderDTO orderDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         
         Project project = projectRepository.findByIdAndOrganizationId(orderDTO.getProjectId(), organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + orderDTO.getProjectId()));
 
         ProcurementOrder order = new ProcurementOrder();
         order.setProject(project);
-        order.setOrganizationId(organizationId);
         order.setPoNumber(orderDTO.getPoNumber());
         order.setSupplierName(orderDTO.getSupplierName());
         order.setItemDescription(orderDTO.getItemDescription());
@@ -79,7 +78,7 @@ public class ProcurementOrderService {
 
     @Transactional
     public ApiResponse<ProcurementOrderDTO> updateProcurementOrder(Long id, ProcurementOrderDTO orderDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         ProcurementOrder order = procurementOrderRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Procurement order not found with id: " + id));
 
@@ -101,7 +100,7 @@ public class ProcurementOrderService {
 
     @Transactional
     public ApiResponse<Void> deleteProcurementOrder(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         ProcurementOrder order = procurementOrderRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Procurement order not found with id: " + id));
         procurementOrderRepository.delete(order);
@@ -113,7 +112,6 @@ public class ProcurementOrderService {
         dto.setId(order.getId());
         dto.setProjectId(order.getProject().getId());
         dto.setProjectName(order.getProject().getName());
-        dto.setOrganizationId(order.getOrganizationId());
         dto.setPoNumber(order.getPoNumber());
         dto.setSupplierName(order.getSupplierName());
         dto.setItemDescription(order.getItemDescription());

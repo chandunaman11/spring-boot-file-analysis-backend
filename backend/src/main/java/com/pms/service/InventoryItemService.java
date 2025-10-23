@@ -24,7 +24,7 @@ public class InventoryItemService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<InventoryItemDTO>> getAllInventoryItems() {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<InventoryItem> items = inventoryItemRepository.findByOrganizationId(organizationId);
         List<InventoryItemDTO> itemDTOs = items.stream()
                 .map(this::convertToDTO)
@@ -34,7 +34,7 @@ public class InventoryItemService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<InventoryItemDTO>> getInventoryItemsByProject(Long projectId) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<InventoryItem> items = inventoryItemRepository.findByProjectIdAndOrganizationId(projectId, organizationId);
         List<InventoryItemDTO> itemDTOs = items.stream()
                 .map(this::convertToDTO)
@@ -44,7 +44,7 @@ public class InventoryItemService {
 
     @Transactional(readOnly = true)
     public ApiResponse<InventoryItemDTO> getInventoryItemById(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         InventoryItem item = inventoryItemRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory item not found with id: " + id));
         return ApiResponse.success(convertToDTO(item), "Inventory item retrieved successfully");
@@ -52,14 +52,13 @@ public class InventoryItemService {
 
     @Transactional
     public ApiResponse<InventoryItemDTO> createInventoryItem(InventoryItemDTO itemDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         
         Project project = projectRepository.findByIdAndOrganizationId(itemDTO.getProjectId(), organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + itemDTO.getProjectId()));
 
         InventoryItem item = new InventoryItem();
         item.setProject(project);
-        item.setOrganizationId(organizationId);
         item.setItemName(itemDTO.getItemName());
         item.setItemCode(itemDTO.getItemCode());
         item.setCategory(itemDTO.getCategory());
@@ -77,7 +76,7 @@ public class InventoryItemService {
 
     @Transactional
     public ApiResponse<InventoryItemDTO> updateInventoryItem(Long id, InventoryItemDTO itemDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         InventoryItem item = inventoryItemRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory item not found with id: " + id));
 
@@ -98,7 +97,7 @@ public class InventoryItemService {
 
     @Transactional
     public ApiResponse<Void> deleteInventoryItem(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         InventoryItem item = inventoryItemRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory item not found with id: " + id));
         inventoryItemRepository.delete(item);
@@ -110,7 +109,6 @@ public class InventoryItemService {
         dto.setId(item.getId());
         dto.setProjectId(item.getProject().getId());
         dto.setProjectName(item.getProject().getName());
-        dto.setOrganizationId(item.getOrganizationId());
         dto.setItemName(item.getItemName());
         dto.setItemCode(item.getItemCode());
         dto.setCategory(item.getCategory());

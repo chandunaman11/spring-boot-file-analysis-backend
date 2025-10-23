@@ -25,7 +25,7 @@ public class DocumentService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<DocumentDTO>> getAllDocuments() {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<Document> documents = documentRepository.findByOrganizationId(organizationId);
         List<DocumentDTO> documentDTOs = documents.stream()
                 .map(this::convertToDTO)
@@ -35,7 +35,7 @@ public class DocumentService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<DocumentDTO>> getDocumentsByProject(Long projectId) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<Document> documents = documentRepository.findByProjectIdAndOrganizationId(projectId, organizationId);
         List<DocumentDTO> documentDTOs = documents.stream()
                 .map(this::convertToDTO)
@@ -45,7 +45,7 @@ public class DocumentService {
 
     @Transactional(readOnly = true)
     public ApiResponse<DocumentDTO> getDocumentById(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         Document document = documentRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found with id: " + id));
         return ApiResponse.success(convertToDTO(document), "Document retrieved successfully");
@@ -53,23 +53,24 @@ public class DocumentService {
 
     @Transactional
     public ApiResponse<DocumentDTO> createDocument(DocumentDTO documentDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         
         Project project = projectRepository.findByIdAndOrganizationId(documentDTO.getProjectId(), organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + documentDTO.getProjectId()));
 
         Document document = new Document();
         document.setProject(project);
-        document.setOrganizationId(organizationId);
-        document.setDocumentName(documentDTO.getDocumentName());
-        document.setDocumentType(documentDTO.getDocumentType());
-        document.setDocumentCategory(documentDTO.getDocumentCategory());
+        document.setFileName(documentDTO.getFileName());
         document.setFilePath(documentDTO.getFilePath());
+        document.setFileUrl(documentDTO.getFileUrl());
         document.setFileSize(documentDTO.getFileSize());
-        document.setUploadedBy(documentDTO.getUploadedBy());
-        document.setUploadedAt(LocalDateTime.now());
+        document.setMimeType(documentDTO.getMimeType());
+        document.setDocumentType(documentDTO.getDocumentType());
+        document.setStatus(documentDTO.getStatus());
         document.setVersion(documentDTO.getVersion() != null ? documentDTO.getVersion() : "1.0");
         document.setDescription(documentDTO.getDescription());
+        document.setCategory(documentDTO.getCategory());
+        document.setTags(documentDTO.getTags());
 
         Document savedDocument = documentRepository.save(document);
         return ApiResponse.success(convertToDTO(savedDocument), "Document created successfully");
@@ -77,17 +78,21 @@ public class DocumentService {
 
     @Transactional
     public ApiResponse<DocumentDTO> updateDocument(Long id, DocumentDTO documentDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         Document document = documentRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found with id: " + id));
 
-        document.setDocumentName(documentDTO.getDocumentName());
-        document.setDocumentType(documentDTO.getDocumentType());
-        document.setDocumentCategory(documentDTO.getDocumentCategory());
+        document.setFileName(documentDTO.getFileName());
         document.setFilePath(documentDTO.getFilePath());
+        document.setFileUrl(documentDTO.getFileUrl());
         document.setFileSize(documentDTO.getFileSize());
+        document.setMimeType(documentDTO.getMimeType());
+        document.setDocumentType(documentDTO.getDocumentType());
+        document.setStatus(documentDTO.getStatus());
         document.setVersion(documentDTO.getVersion());
         document.setDescription(documentDTO.getDescription());
+        document.setCategory(documentDTO.getCategory());
+        document.setTags(documentDTO.getTags());
 
         Document updatedDocument = documentRepository.save(document);
         return ApiResponse.success(convertToDTO(updatedDocument), "Document updated successfully");
@@ -95,7 +100,7 @@ public class DocumentService {
 
     @Transactional
     public ApiResponse<Void> deleteDocument(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         Document document = documentRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found with id: " + id));
         documentRepository.delete(document);
@@ -106,17 +111,24 @@ public class DocumentService {
         DocumentDTO dto = new DocumentDTO();
         dto.setId(document.getId());
         dto.setProjectId(document.getProject().getId());
-        dto.setProjectName(document.getProject().getName());
-        dto.setOrganizationId(document.getOrganizationId());
-        dto.setDocumentName(document.getDocumentName());
-        dto.setDocumentType(document.getDocumentType());
-        dto.setDocumentCategory(document.getDocumentCategory());
+        dto.setFileName(document.getFileName());
         dto.setFilePath(document.getFilePath());
+        dto.setFileUrl(document.getFileUrl());
         dto.setFileSize(document.getFileSize());
-        dto.setUploadedBy(document.getUploadedBy());
-        dto.setUploadedAt(document.getUploadedAt());
+        dto.setMimeType(document.getMimeType());
+        dto.setDocumentType(document.getDocumentType());
+        dto.setStatus(document.getStatus());
         dto.setVersion(document.getVersion());
         dto.setDescription(document.getDescription());
+        dto.setCategory(document.getCategory());
+        dto.setTags(document.getTags());
+        dto.setUploadedById(document.getUploadedBy() != null ? document.getUploadedBy().getId() : null);
+        dto.setUploadedByName(document.getUploadedBy() != null ? document.getUploadedBy().getUsername() : null);
+        dto.setApprovedById(document.getApprovedBy() != null ? document.getApprovedBy().getId() : null);
+        dto.setApprovedByName(document.getApprovedBy() != null ? document.getApprovedBy().getUsername() : null);
+        dto.setApprovedAt(document.getApprovedAt());
+        dto.setParentDocumentId(document.getParentDocument() != null ? document.getParentDocument().getId() : null);
+        dto.setIsLatestVersion(document.getIsLatestVersion());
         dto.setCreatedAt(document.getCreatedAt());
         dto.setUpdatedAt(document.getUpdatedAt());
         return dto;

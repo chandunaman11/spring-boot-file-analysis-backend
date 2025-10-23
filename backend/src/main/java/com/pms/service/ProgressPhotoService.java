@@ -25,7 +25,7 @@ public class ProgressPhotoService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<ProgressPhotoDTO>> getAllProgressPhotos() {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<ProgressPhoto> photos = progressPhotoRepository.findByOrganizationId(organizationId);
         List<ProgressPhotoDTO> photoDTOs = photos.stream()
                 .map(this::convertToDTO)
@@ -35,7 +35,7 @@ public class ProgressPhotoService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<ProgressPhotoDTO>> getProgressPhotosByProject(Long projectId) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<ProgressPhoto> photos = progressPhotoRepository.findByProjectIdAndOrganizationId(projectId, organizationId);
         List<ProgressPhotoDTO> photoDTOs = photos.stream()
                 .map(this::convertToDTO)
@@ -45,7 +45,7 @@ public class ProgressPhotoService {
 
     @Transactional(readOnly = true)
     public ApiResponse<ProgressPhotoDTO> getProgressPhotoById(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         ProgressPhoto photo = progressPhotoRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Progress photo not found with id: " + id));
         return ApiResponse.success(convertToDTO(photo), "Progress photo retrieved successfully");
@@ -53,14 +53,13 @@ public class ProgressPhotoService {
 
     @Transactional
     public ApiResponse<ProgressPhotoDTO> createProgressPhoto(ProgressPhotoDTO photoDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         
         Project project = projectRepository.findByIdAndOrganizationId(photoDTO.getProjectId(), organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + photoDTO.getProjectId()));
 
         ProgressPhoto photo = new ProgressPhoto();
         photo.setProject(project);
-        photo.setOrganizationId(organizationId);
         photo.setPhotoTitle(photoDTO.getPhotoTitle());
         photo.setPhotoUrl(photoDTO.getPhotoUrl());
         photo.setThumbnailUrl(photoDTO.getThumbnailUrl());
@@ -76,7 +75,7 @@ public class ProgressPhotoService {
 
     @Transactional
     public ApiResponse<ProgressPhotoDTO> updateProgressPhoto(Long id, ProgressPhotoDTO photoDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         ProgressPhoto photo = progressPhotoRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Progress photo not found with id: " + id));
 
@@ -94,7 +93,7 @@ public class ProgressPhotoService {
 
     @Transactional
     public ApiResponse<Void> deleteProgressPhoto(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         ProgressPhoto photo = progressPhotoRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Progress photo not found with id: " + id));
         progressPhotoRepository.delete(photo);
@@ -106,7 +105,6 @@ public class ProgressPhotoService {
         dto.setId(photo.getId());
         dto.setProjectId(photo.getProject().getId());
         dto.setProjectName(photo.getProject().getName());
-        dto.setOrganizationId(photo.getOrganizationId());
         dto.setPhotoTitle(photo.getPhotoTitle());
         dto.setPhotoUrl(photo.getPhotoUrl());
         dto.setThumbnailUrl(photo.getThumbnailUrl());

@@ -24,7 +24,7 @@ public class MilestoneService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<MilestoneDTO>> getAllMilestones() {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<Milestone> milestones = milestoneRepository.findByOrganizationId(organizationId);
         List<MilestoneDTO> milestoneDTOs = milestones.stream()
                 .map(this::convertToDTO)
@@ -34,7 +34,7 @@ public class MilestoneService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<MilestoneDTO>> getMilestonesByProject(Long projectId) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<Milestone> milestones = milestoneRepository.findByProjectIdAndOrganizationId(projectId, organizationId);
         List<MilestoneDTO> milestoneDTOs = milestones.stream()
                 .map(this::convertToDTO)
@@ -44,7 +44,7 @@ public class MilestoneService {
 
     @Transactional(readOnly = true)
     public ApiResponse<MilestoneDTO> getMilestoneById(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         Milestone milestone = milestoneRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Milestone not found with id: " + id));
         return ApiResponse.success(convertToDTO(milestone), "Milestone retrieved successfully");
@@ -52,21 +52,20 @@ public class MilestoneService {
 
     @Transactional
     public ApiResponse<MilestoneDTO> createMilestone(MilestoneDTO milestoneDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         
         Project project = projectRepository.findByIdAndOrganizationId(milestoneDTO.getProjectId(), organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + milestoneDTO.getProjectId()));
 
         Milestone milestone = new Milestone();
         milestone.setProject(project);
-        milestone.setOrganizationId(organizationId);
-        milestone.setMilestoneName(milestoneDTO.getMilestoneName());
+        milestone.setName(milestoneDTO.getName());
         milestone.setDescription(milestoneDTO.getDescription());
         milestone.setDueDate(milestoneDTO.getDueDate());
-        milestone.setCompletionDate(milestoneDTO.getCompletionDate());
+        milestone.setCompletedDate(milestoneDTO.getCompletedDate());
         milestone.setStatus(milestoneDTO.getStatus());
-        milestone.setDeliverables(milestoneDTO.getDeliverables());
-        milestone.setPercentageComplete(milestoneDTO.getPercentageComplete() != null ? milestoneDTO.getPercentageComplete() : 0);
+        milestone.setProgress(milestoneDTO.getProgress() != null ? milestoneDTO.getProgress() : 0);
+        milestone.setNotes(milestoneDTO.getNotes());
 
         Milestone savedMilestone = milestoneRepository.save(milestone);
         return ApiResponse.success(convertToDTO(savedMilestone), "Milestone created successfully");
@@ -74,17 +73,17 @@ public class MilestoneService {
 
     @Transactional
     public ApiResponse<MilestoneDTO> updateMilestone(Long id, MilestoneDTO milestoneDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         Milestone milestone = milestoneRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Milestone not found with id: " + id));
 
-        milestone.setMilestoneName(milestoneDTO.getMilestoneName());
+        milestone.setName(milestoneDTO.getName());
         milestone.setDescription(milestoneDTO.getDescription());
         milestone.setDueDate(milestoneDTO.getDueDate());
-        milestone.setCompletionDate(milestoneDTO.getCompletionDate());
+        milestone.setCompletedDate(milestoneDTO.getCompletedDate());
         milestone.setStatus(milestoneDTO.getStatus());
-        milestone.setDeliverables(milestoneDTO.getDeliverables());
-        milestone.setPercentageComplete(milestoneDTO.getPercentageComplete());
+        milestone.setProgress(milestoneDTO.getProgress());
+        milestone.setNotes(milestoneDTO.getNotes());
 
         Milestone updatedMilestone = milestoneRepository.save(milestone);
         return ApiResponse.success(convertToDTO(updatedMilestone), "Milestone updated successfully");
@@ -92,7 +91,7 @@ public class MilestoneService {
 
     @Transactional
     public ApiResponse<Void> deleteMilestone(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         Milestone milestone = milestoneRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Milestone not found with id: " + id));
         milestoneRepository.delete(milestone);
@@ -104,14 +103,15 @@ public class MilestoneService {
         dto.setId(milestone.getId());
         dto.setProjectId(milestone.getProject().getId());
         dto.setProjectName(milestone.getProject().getName());
-        dto.setOrganizationId(milestone.getOrganizationId());
-        dto.setMilestoneName(milestone.getMilestoneName());
+        dto.setOrganizationId(milestone.getOrganization() != null ? milestone.getOrganization().getId() : null);
+        dto.setOrganizationName(milestone.getOrganization() != null ? milestone.getOrganization().getName() : null);
+        dto.setName(milestone.getName());
         dto.setDescription(milestone.getDescription());
         dto.setDueDate(milestone.getDueDate());
-        dto.setCompletionDate(milestone.getCompletionDate());
+        dto.setCompletedDate(milestone.getCompletedDate());
         dto.setStatus(milestone.getStatus());
-        dto.setDeliverables(milestone.getDeliverables());
-        dto.setPercentageComplete(milestone.getPercentageComplete());
+        dto.setProgress(milestone.getProgress());
+        dto.setNotes(milestone.getNotes());
         dto.setCreatedAt(milestone.getCreatedAt());
         dto.setUpdatedAt(milestone.getUpdatedAt());
         return dto;

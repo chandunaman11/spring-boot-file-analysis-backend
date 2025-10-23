@@ -25,7 +25,7 @@ public class DprEntryService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<DprEntryDTO>> getAllDprEntries() {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<DprEntry> entries = dprEntryRepository.findByOrganizationId(organizationId);
         List<DprEntryDTO> entryDTOs = entries.stream()
                 .map(this::convertToDTO)
@@ -35,7 +35,7 @@ public class DprEntryService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<DprEntryDTO>> getDprEntriesByProject(Long projectId) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<DprEntry> entries = dprEntryRepository.findByProjectIdAndOrganizationId(projectId, organizationId);
         List<DprEntryDTO> entryDTOs = entries.stream()
                 .map(this::convertToDTO)
@@ -45,7 +45,7 @@ public class DprEntryService {
 
     @Transactional(readOnly = true)
     public ApiResponse<DprEntryDTO> getDprEntryById(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         DprEntry entry = dprEntryRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("DPR entry not found with id: " + id));
         return ApiResponse.success(convertToDTO(entry), "DPR entry retrieved successfully");
@@ -53,14 +53,13 @@ public class DprEntryService {
 
     @Transactional
     public ApiResponse<DprEntryDTO> createDprEntry(DprEntryDTO entryDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         
         Project project = projectRepository.findByIdAndOrganizationId(entryDTO.getProjectId(), organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + entryDTO.getProjectId()));
 
         DprEntry entry = new DprEntry();
         entry.setProject(project);
-        entry.setOrganizationId(organizationId);
         entry.setReportDate(entryDTO.getReportDate() != null ? entryDTO.getReportDate() : LocalDate.now());
         entry.setWeatherCondition(entryDTO.getWeatherCondition());
         entry.setWorkDescription(entryDTO.getWorkDescription());
@@ -78,7 +77,7 @@ public class DprEntryService {
 
     @Transactional
     public ApiResponse<DprEntryDTO> updateDprEntry(Long id, DprEntryDTO entryDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         DprEntry entry = dprEntryRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("DPR entry not found with id: " + id));
 
@@ -99,7 +98,7 @@ public class DprEntryService {
 
     @Transactional
     public ApiResponse<Void> deleteDprEntry(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         DprEntry entry = dprEntryRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("DPR entry not found with id: " + id));
         dprEntryRepository.delete(entry);
@@ -111,7 +110,6 @@ public class DprEntryService {
         dto.setId(entry.getId());
         dto.setProjectId(entry.getProject().getId());
         dto.setProjectName(entry.getProject().getName());
-        dto.setOrganizationId(entry.getOrganizationId());
         dto.setReportDate(entry.getReportDate());
         dto.setWeatherCondition(entry.getWeatherCondition());
         dto.setWorkDescription(entry.getWorkDescription());

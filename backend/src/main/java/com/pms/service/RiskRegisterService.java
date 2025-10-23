@@ -25,7 +25,7 @@ public class RiskRegisterService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<RiskRegisterDTO>> getAllRisks() {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<RiskRegister> risks = riskRegisterRepository.findByOrganizationId(organizationId);
         List<RiskRegisterDTO> riskDTOs = risks.stream()
                 .map(this::convertToDTO)
@@ -35,7 +35,7 @@ public class RiskRegisterService {
 
     @Transactional(readOnly = true)
     public ApiResponse<List<RiskRegisterDTO>> getRisksByProject(Long projectId) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         List<RiskRegister> risks = riskRegisterRepository.findByProjectIdAndOrganizationId(projectId, organizationId);
         List<RiskRegisterDTO> riskDTOs = risks.stream()
                 .map(this::convertToDTO)
@@ -45,7 +45,7 @@ public class RiskRegisterService {
 
     @Transactional(readOnly = true)
     public ApiResponse<RiskRegisterDTO> getRiskById(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         RiskRegister risk = riskRegisterRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Risk not found with id: " + id));
         return ApiResponse.success(convertToDTO(risk), "Risk retrieved successfully");
@@ -53,14 +53,13 @@ public class RiskRegisterService {
 
     @Transactional
     public ApiResponse<RiskRegisterDTO> createRisk(RiskRegisterDTO riskDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         
         Project project = projectRepository.findByIdAndOrganizationId(riskDTO.getProjectId(), organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + riskDTO.getProjectId()));
 
         RiskRegister risk = new RiskRegister();
         risk.setProject(project);
-        risk.setOrganizationId(organizationId);
         risk.setRiskDescription(riskDTO.getRiskDescription());
         risk.setRiskCategory(riskDTO.getRiskCategory());
         risk.setProbability(riskDTO.getProbability());
@@ -78,7 +77,7 @@ public class RiskRegisterService {
 
     @Transactional
     public ApiResponse<RiskRegisterDTO> updateRisk(Long id, RiskRegisterDTO riskDTO) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         RiskRegister risk = riskRegisterRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Risk not found with id: " + id));
 
@@ -99,7 +98,7 @@ public class RiskRegisterService {
 
     @Transactional
     public ApiResponse<Void> deleteRisk(Long id) {
-        String organizationId = OrganizationContext.getCurrentOrganizationId();
+        Long organizationId = OrganizationContext.getCurrentOrganizationId();
         RiskRegister risk = riskRegisterRepository.findByIdAndOrganizationId(id, organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Risk not found with id: " + id));
         riskRegisterRepository.delete(risk);
@@ -115,7 +114,6 @@ public class RiskRegisterService {
         dto.setId(risk.getId());
         dto.setProjectId(risk.getProject().getId());
         dto.setProjectName(risk.getProject().getName());
-        dto.setOrganizationId(risk.getOrganizationId());
         dto.setRiskDescription(risk.getRiskDescription());
         dto.setRiskCategory(risk.getRiskCategory());
         dto.setProbability(risk.getProbability());
