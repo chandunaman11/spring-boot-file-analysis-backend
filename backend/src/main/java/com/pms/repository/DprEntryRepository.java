@@ -13,7 +13,11 @@ public interface DprEntryRepository extends JpaRepository<DprEntry, Long> {
     
     List<DprEntry> findByProjectId(Long projectId);
     
-    List<DprEntry> findByOrganizationId(Long organizationId);
+    List<DprEntry> findByOrganizationId(String organizationId);
+    
+    Optional<DprEntry> findByIdAndOrganizationId(Long id, String organizationId);
+    
+    List<DprEntry> findByProjectIdAndOrganizationId(Long projectId, String organizationId);
     
     List<DprEntry> findByProjectIdAndReportDate(Long projectId, LocalDate reportDate);
     

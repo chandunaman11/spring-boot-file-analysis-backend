@@ -6,13 +6,18 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProgressPhotoRepository extends JpaRepository<ProgressPhoto, Long> {
     
     List<ProgressPhoto> findByProjectId(Long projectId);
     
-    List<ProgressPhoto> findByOrganizationId(Long organizationId);
+    List<ProgressPhoto> findByOrganizationId(String organizationId);
+    
+    Optional<ProgressPhoto> findByIdAndOrganizationId(Long id, String organizationId);
+    
+    List<ProgressPhoto> findByProjectIdAndOrganizationId(Long projectId, String organizationId);
     
     List<ProgressPhoto> findByProjectIdAndCategory(Long projectId, String category);
     

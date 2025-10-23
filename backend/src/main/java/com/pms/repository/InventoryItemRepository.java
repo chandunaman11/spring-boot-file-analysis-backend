@@ -14,11 +14,15 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, Lo
     
     Optional<InventoryItem> findByItemCode(String itemCode);
     
-    List<InventoryItem> findByOrganizationId(Long organizationId);
+    List<InventoryItem> findByOrganizationId(String organizationId);
     
-    List<InventoryItem> findByOrganizationIdAndCategory(Long organizationId, String category);
+    Optional<InventoryItem> findByIdAndOrganizationId(Long id, String organizationId);
     
-    List<InventoryItem> findByOrganizationIdAndStatus(Long organizationId, InventoryItem.StockStatus status);
+    List<InventoryItem> findByProjectIdAndOrganizationId(Long projectId, String organizationId);
+    
+    List<InventoryItem> findByOrganizationIdAndCategory(String organizationId, String category);
+    
+    List<InventoryItem> findByOrganizationIdAndStatus(String organizationId, InventoryItem.StockStatus status);
     
     @Query("SELECT i FROM InventoryItem i WHERE i.organization.id = :organizationId AND i.currentStock <= i.reorderLevel")
     List<InventoryItem> findLowStockItems(@Param("organizationId") Long organizationId);

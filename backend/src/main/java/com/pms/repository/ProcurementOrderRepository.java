@@ -14,9 +14,13 @@ public interface ProcurementOrderRepository extends JpaRepository<ProcurementOrd
     
     List<ProcurementOrder> findByProjectId(Long projectId);
     
-    List<ProcurementOrder> findByOrganizationId(Long organizationId);
+    List<ProcurementOrder> findByOrganizationId(String organizationId);
     
-    List<ProcurementOrder> findByOrganizationIdAndStatus(Long organizationId, ProcurementOrder.OrderStatus status);
+    Optional<ProcurementOrder> findByIdAndOrganizationId(Long id, String organizationId);
+    
+    List<ProcurementOrder> findByProjectIdAndOrganizationId(Long projectId, String organizationId);
+    
+    List<ProcurementOrder> findByOrganizationIdAndStatus(String organizationId, ProcurementOrder.OrderStatus status);
     
     List<ProcurementOrder> findByProjectIdAndStatus(Long projectId, ProcurementOrder.OrderStatus status);
     
