@@ -5,7 +5,7 @@ import com.pms.dto.ProcurementOrderDTO;
 import com.pms.entity.ProcurementOrder;
 import com.pms.entity.Project;
 import com.pms.exception.ResourceNotFoundException;
-import com.pms.filter.OrganizationContext;
+import com.pms.context.OrganizationContext;
 import com.pms.repository.ProcurementOrderRepository;
 import com.pms.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;

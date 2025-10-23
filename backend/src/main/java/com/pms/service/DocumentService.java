@@ -5,7 +5,7 @@ import com.pms.dto.DocumentDTO;
 import com.pms.entity.Document;
 import com.pms.entity.Project;
 import com.pms.exception.ResourceNotFoundException;
-import com.pms.filter.OrganizationContext;
+import com.pms.context.OrganizationContext;
 import com.pms.repository.DocumentRepository;
 import com.pms.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;

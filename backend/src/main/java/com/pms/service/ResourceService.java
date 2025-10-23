@@ -2,11 +2,10 @@ package com.pms.service;
 
 import com.pms.dto.ApiResponse;
 import com.pms.dto.ResourceDTO;
-import com.pms.entity.Project;
 import com.pms.entity.Resource;
+import com.pms.entity.Project;
 import com.pms.exception.ResourceNotFoundException;
-import com.pms.filter.OrganizationContext;
-import com.pms.repository.ProjectRepository;
+import com.pms.context.OrganizationContext;
 import com.pms.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

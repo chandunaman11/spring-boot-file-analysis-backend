@@ -5,7 +5,7 @@ import com.pms.dto.ContractDTO;
 import com.pms.entity.Contract;
 import com.pms.entity.Project;
 import com.pms.exception.ResourceNotFoundException;
-import com.pms.filter.OrganizationContext;
+import com.pms.context.OrganizationContext;
 import com.pms.repository.ContractRepository;
 import com.pms.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;

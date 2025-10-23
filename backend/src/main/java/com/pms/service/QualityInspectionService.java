@@ -5,8 +5,7 @@ import com.pms.dto.QualityInspectionDTO;
 import com.pms.entity.Project;
 import com.pms.entity.QualityInspection;
 import com.pms.exception.ResourceNotFoundException;
-import com.pms.filter.OrganizationContext;
-import com.pms.repository.ProjectRepository;
+import com.pms.context.OrganizationContext;
 import com.pms.repository.QualityInspectionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ import java.util.stream.Collectors;
 public class QualityInspectionService {
 
     private final QualityInspectionRepository qualityInspectionRepository;
-    private final ProjectRepository projectRepository;
 
     @Transactional(readOnly = true)
     public ApiResponse<List<QualityInspectionDTO>> getAllInspections() {

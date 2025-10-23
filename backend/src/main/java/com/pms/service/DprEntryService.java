@@ -5,7 +5,7 @@ import com.pms.dto.DprEntryDTO;
 import com.pms.entity.DprEntry;
 import com.pms.entity.Project;
 import com.pms.exception.ResourceNotFoundException;
-import com.pms.filter.OrganizationContext;
+import com.pms.context.OrganizationContext;
 import com.pms.repository.DprEntryRepository;
 import com.pms.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;

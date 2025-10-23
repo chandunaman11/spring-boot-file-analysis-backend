@@ -5,7 +5,7 @@ import com.pms.dto.ProgressPhotoDTO;
 import com.pms.entity.ProgressPhoto;
 import com.pms.entity.Project;
 import com.pms.exception.ResourceNotFoundException;
-import com.pms.filter.OrganizationContext;
+import com.pms.context.OrganizationContext;
 import com.pms.repository.ProgressPhotoRepository;
 import com.pms.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
