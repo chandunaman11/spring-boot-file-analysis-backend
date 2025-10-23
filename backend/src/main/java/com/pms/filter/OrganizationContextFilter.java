@@ -1,5 +1,6 @@
 package com.pms.filter;
 
+import com.pms.context.OrganizationContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,20 +14,6 @@ import java.io.IOException;
 @Slf4j
 @Component
 public class OrganizationContextFilter extends OncePerRequestFilter {
-    
-    private static final ThreadLocal<Long> currentOrganizationId = new ThreadLocal<>();
-    
-    public static Long getCurrentOrganizationId() {
-        return currentOrganizationId.get();
-    }
-    
-    public static void setCurrentOrganizationId(Long organizationId) {
-        currentOrganizationId.set(organizationId);
-    }
-    
-    public static void clear() {
-        currentOrganizationId.remove();
-    }
     
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -44,7 +31,7 @@ public class OrganizationContextFilter extends OncePerRequestFilter {
             if (orgIdHeader != null && !orgIdHeader.isEmpty()) {
                 try {
                     Long organizationId = Long.parseLong(orgIdHeader);
-                    setCurrentOrganizationId(organizationId);
+                    OrganizationContext.setCurrentOrganizationId(organizationId);
                     log.debug("Organization context set to: {}", organizationId);
                 } catch (NumberFormatException e) {
                     log.error("Invalid X-Organization-Id header: {}", orgIdHeader);
@@ -58,7 +45,7 @@ public class OrganizationContextFilter extends OncePerRequestFilter {
             
             filterChain.doFilter(request, response);
         } finally {
-            clear();
+            OrganizationContext.clear();
         }
     }
     
