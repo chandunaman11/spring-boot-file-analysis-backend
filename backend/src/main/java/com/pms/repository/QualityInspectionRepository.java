@@ -13,15 +13,19 @@ import java.util.Optional;
 @Repository
 public interface QualityInspectionRepository extends JpaRepository<QualityInspection, Long> {
     
+    // Multi-tenancy support methods (through project.organization)
+    @Query("SELECT qi FROM QualityInspection qi WHERE qi.project.organization.id = :organizationId")
+    List<QualityInspection> findByOrganizationId(@Param("organizationId") Long organizationId);
+    
+    @Query("SELECT qi FROM QualityInspection qi WHERE qi.id = :id AND qi.project.organization.id = :organizationId")
+    Optional<QualityInspection> findByIdAndOrganizationId(@Param("id") Long id, @Param("organizationId") Long organizationId);
+    
+    @Query("SELECT qi FROM QualityInspection qi WHERE qi.project.id = :projectId AND qi.project.organization.id = :organizationId")
+    List<QualityInspection> findByProjectIdAndOrganizationId(@Param("projectId") Long projectId, @Param("organizationId") Long organizationId);
+    
     Optional<QualityInspection> findByInspectionNumber(String inspectionNumber);
     
     List<QualityInspection> findByProjectId(Long projectId);
-    
-    List<QualityInspection> findByOrganizationId(String organizationId);
-    
-    Optional<QualityInspection> findByIdAndOrganizationId(Long id, String organizationId);
-    
-    List<QualityInspection> findByProjectIdAndOrganizationId(Long projectId, String organizationId);
     
     List<QualityInspection> findByProjectIdAndStatus(Long projectId, QualityInspection.InspectionStatus status);
     

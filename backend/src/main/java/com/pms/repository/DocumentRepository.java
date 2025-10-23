@@ -26,15 +26,15 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     
     List<Document> findByParentDocumentId(Long parentDocumentId);
     
-    // Multi-tenancy support methods
-    List<Document> findByOrganizationId(String organizationId);
+    // Multi-tenancy support methods (through project.organization)
+    @Query("SELECT d FROM Document d WHERE d.project.organization.id = :organizationId")
+    List<Document> findByOrganizationId(@Param("organizationId") Long organizationId);
     
-    Optional<Document> findByIdAndOrganizationId(Long id, String organizationId);
+    @Query("SELECT d FROM Document d WHERE d.id = :id AND d.project.organization.id = :organizationId")
+    Optional<Document> findByIdAndOrganizationId(@Param("id") Long id, @Param("organizationId") Long organizationId);
     
-    @Query("SELECT d FROM Document d WHERE d.project.id = :projectId AND " +
-           "d.project.organization.id = :organizationId")
-    List<Document> findByProjectIdAndOrganizationId(@Param("projectId") Long projectId,
-                                                     @Param("organizationId") String organizationId);
+    @Query("SELECT d FROM Document d WHERE d.project.id = :projectId AND d.project.organization.id = :organizationId")
+    List<Document> findByProjectIdAndOrganizationId(@Param("projectId") Long projectId, @Param("organizationId") Long organizationId);
     
     @Query("SELECT d FROM Document d WHERE d.project.id = :projectId AND " +
            "(LOWER(d.fileName) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +

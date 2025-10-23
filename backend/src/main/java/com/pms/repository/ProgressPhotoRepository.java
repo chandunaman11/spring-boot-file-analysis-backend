@@ -2,6 +2,8 @@ package com.pms.repository;
 
 import com.pms.entity.ProgressPhoto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -11,13 +13,15 @@ import java.util.Optional;
 @Repository
 public interface ProgressPhotoRepository extends JpaRepository<ProgressPhoto, Long> {
     
-    List<ProgressPhoto> findByProjectId(Long projectId);
+    // Multi-tenancy support methods (through project.organization)
+    @Query("SELECT pp FROM ProgressPhoto pp WHERE pp.project.organization.id = :organizationId")
+    List<ProgressPhoto> findByOrganizationId(@Param("organizationId") Long organizationId);
     
-    List<ProgressPhoto> findByOrganizationId(String organizationId);
+    @Query("SELECT pp FROM ProgressPhoto pp WHERE pp.id = :id AND pp.project.organization.id = :organizationId")
+    Optional<ProgressPhoto> findByIdAndOrganizationId(@Param("id") Long id, @Param("organizationId") Long organizationId);
     
-    Optional<ProgressPhoto> findByIdAndOrganizationId(Long id, String organizationId);
-    
-    List<ProgressPhoto> findByProjectIdAndOrganizationId(Long projectId, String organizationId);
+    @Query("SELECT pp FROM ProgressPhoto pp WHERE pp.project.id = :projectId AND pp.project.organization.id = :organizationId")
+    List<ProgressPhoto> findByProjectIdAndOrganizationId(@Param("projectId") Long projectId, @Param("organizationId") Long organizationId);
     
     List<ProgressPhoto> findByProjectIdAndCategory(Long projectId, String category);
     

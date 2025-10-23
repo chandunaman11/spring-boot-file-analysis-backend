@@ -21,7 +21,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     
     List<Project> findByProjectManagerId(Long projectManagerId);
     
-    Optional<Project> findByIdAndOrganizationId(Long id, String organizationId);
+    Optional<Project> findByIdAndOrganizationId(Long id, Long organizationId);
     
     @Query("SELECT p FROM Project p JOIN p.members m WHERE m.id = :userId")
     List<Project> findByMemberId(@Param("userId") Long userId);

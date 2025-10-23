@@ -12,17 +12,20 @@ import java.util.Optional;
 @Repository
 public interface InventoryItemRepository extends JpaRepository<InventoryItem, Long> {
     
-    Optional<InventoryItem> findByItemCode(String itemCode);
+    // Multi-tenancy support methods
+    List<InventoryItem> findByOrganizationId(Long organizationId);
     
-    List<InventoryItem> findByOrganizationId(String organizationId);
+    Optional<InventoryItem> findByIdAndOrganizationId(Long id, Long organizationId);
     
-    Optional<InventoryItem> findByIdAndOrganizationId(Long id, String organizationId);
+    List<InventoryItem> findByProjectIdAndOrganizationId(Long projectId, Long organizationId);
     
-    List<InventoryItem> findByProjectIdAndOrganizationId(Long projectId, String organizationId);
+    List<InventoryItem> findByWarehouseLocationAndOrganizationId(String warehouseLocation, Long organizationId);
     
-    List<InventoryItem> findByOrganizationIdAndCategory(String organizationId, String category);
+    List<InventoryItem> findByQuantityLessThanAndOrganizationId(Integer quantity, Long organizationId);
     
-    List<InventoryItem> findByOrganizationIdAndStatus(String organizationId, InventoryItem.StockStatus status);
+    List<InventoryItem> findByOrganizationIdAndCategory(Long organizationId, String category);
+    
+    List<InventoryItem> findByOrganizationIdAndStatus(Long organizationId, InventoryItem.StockStatus status);
     
     @Query("SELECT i FROM InventoryItem i WHERE i.organization.id = :organizationId AND i.currentStock <= i.reorderLevel")
     List<InventoryItem> findLowStockItems(@Param("organizationId") Long organizationId);

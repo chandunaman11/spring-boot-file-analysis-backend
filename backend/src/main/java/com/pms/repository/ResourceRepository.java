@@ -12,15 +12,22 @@ import java.util.Optional;
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
     
+    // Multi-tenancy support methods (through project.organization)
+    @Query("SELECT r FROM Resource r WHERE r.project.organization.id = :organizationId")
+    List<Resource> findByOrganizationId(@Param("organizationId") Long organizationId);
+    
+    @Query("SELECT r FROM Resource r WHERE r.id = :id AND r.project.organization.id = :organizationId")
+    Optional<Resource> findByIdAndOrganizationId(@Param("id") Long id, @Param("organizationId") Long organizationId);
+    
+    @Query("SELECT r FROM Resource r WHERE r.project.id = :projectId AND r.project.organization.id = :organizationId")
+    List<Resource> findByProjectIdAndOrganizationId(@Param("projectId") Long projectId, @Param("organizationId") Long organizationId);
+    
+    @Query("SELECT r FROM Resource r WHERE r.task.id = :taskId AND r.project.organization.id = :organizationId")
+    List<Resource> findByTaskIdAndOrganizationId(@Param("taskId") Long taskId, @Param("organizationId") Long organizationId);
+    
     Optional<Resource> findByCode(String code);
     
     List<Resource> findByProjectId(Long projectId);
-    
-    List<Resource> findByOrganizationId(String organizationId);
-    
-    Optional<Resource> findByIdAndOrganizationId(Long id, String organizationId);
-    
-    List<Resource> findByProjectIdAndOrganizationId(Long projectId, String organizationId);
     
     List<Resource> findByProjectIdAndType(Long projectId, Resource.ResourceType type);
     
@@ -28,7 +35,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     
     List<Resource> findByProjectIdAndCategory(Long projectId, String category);
     
-    List<Resource> findByOrganizationIdAndType(String organizationId, Resource.ResourceType type);
+    List<Resource> findByOrganizationIdAndType(Long organizationId, Resource.ResourceType type);
     
     @Query("SELECT r FROM Resource r WHERE r.project.id = :projectId AND " +
            "(LOWER(r.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +

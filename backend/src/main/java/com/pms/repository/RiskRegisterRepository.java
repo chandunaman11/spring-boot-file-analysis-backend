@@ -12,15 +12,15 @@ import java.util.Optional;
 @Repository
 public interface RiskRegisterRepository extends JpaRepository<RiskRegister, Long> {
     
-    Optional<RiskRegister> findByRiskId(String riskId);
+    // Multi-tenancy support methods (through project.organization)
+    @Query("SELECT rr FROM RiskRegister rr WHERE rr.project.organization.id = :organizationId")
+    List<RiskRegister> findByOrganizationId(@Param("organizationId") Long organizationId);
     
-    List<RiskRegister> findByProjectId(Long projectId);
+    @Query("SELECT rr FROM RiskRegister rr WHERE rr.id = :id AND rr.project.organization.id = :organizationId")
+    Optional<RiskRegister> findByIdAndOrganizationId(@Param("id") Long id, @Param("organizationId") Long organizationId);
     
-    List<RiskRegister> findByOrganizationId(String organizationId);
-    
-    Optional<RiskRegister> findByIdAndOrganizationId(Long id, String organizationId);
-    
-    List<RiskRegister> findByProjectIdAndOrganizationId(Long projectId, String organizationId);
+    @Query("SELECT rr FROM RiskRegister rr WHERE rr.project.id = :projectId AND rr.project.organization.id = :organizationId")
+    List<RiskRegister> findByProjectIdAndOrganizationId(@Param("projectId") Long projectId, @Param("organizationId") Long organizationId);
     
     List<RiskRegister> findByProjectIdAndStatus(Long projectId, RiskRegister.RiskStatus status);
     

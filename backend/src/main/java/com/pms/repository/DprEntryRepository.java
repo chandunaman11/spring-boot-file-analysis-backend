@@ -11,13 +11,14 @@ import java.util.Optional;
 @Repository
 public interface DprEntryRepository extends JpaRepository<DprEntry, Long> {
     
+    // Multi-tenancy support methods
+    List<DprEntry> findByOrganizationId(Long organizationId);
+    
+    Optional<DprEntry> findByIdAndOrganizationId(Long id, Long organizationId);
+    
+    List<DprEntry> findByProjectIdAndOrganizationId(Long projectId, Long organizationId);
+    
     List<DprEntry> findByProjectId(Long projectId);
-    
-    List<DprEntry> findByOrganizationId(String organizationId);
-    
-    Optional<DprEntry> findByIdAndOrganizationId(Long id, String organizationId);
-    
-    List<DprEntry> findByProjectIdAndOrganizationId(Long projectId, String organizationId);
     
     List<DprEntry> findByProjectIdAndReportDate(Long projectId, LocalDate reportDate);
     

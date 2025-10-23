@@ -23,12 +23,15 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     
     List<Contract> findByVendorName(String vendorName);
     
-    // Multi-tenancy support methods
-    List<Contract> findByOrganizationId(String organizationId);
+    // Multi-tenancy support methods (through project.organization)
+    @Query("SELECT c FROM Contract c WHERE c.project.organization.id = :organizationId")
+    List<Contract> findByOrganizationId(@Param("organizationId") Long organizationId);
     
-    Optional<Contract> findByIdAndOrganizationId(Long id, String organizationId);
+    @Query("SELECT c FROM Contract c WHERE c.id = :id AND c.project.organization.id = :organizationId")
+    Optional<Contract> findByIdAndOrganizationId(@Param("id") Long id, @Param("organizationId") Long organizationId);
     
-    List<Contract> findByProjectIdAndOrganizationId(Long projectId, String organizationId);
+    @Query("SELECT c FROM Contract c WHERE c.project.id = :projectId AND c.project.organization.id = :organizationId")
+    List<Contract> findByProjectIdAndOrganizationId(@Param("projectId") Long projectId, @Param("organizationId") Long organizationId);
     
     @Query("SELECT c FROM Contract c WHERE c.project.id = :projectId AND " +
            "c.endDate BETWEEN :startDate AND :endDate")
